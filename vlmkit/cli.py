@@ -11,6 +11,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import __version__
 from .core import ask, collect_images, is_supported_image, VisionError
 
 PROMPTS = {
@@ -121,6 +122,10 @@ def main():
     ap.add_argument("--json", action="store_true",
                     help="输出 JSON（供程序调用）")
     ap.add_argument("--max-tokens", type=int, default=400)
+    # 装在机器上的到底是哪版得能问出来：它常被 pipx / MCP 包着跑，出问题第一句话
+    # 往往是「你装的哪个版本」，没有这个就只能去翻 site-packages。
+    ap.add_argument("--version", action="version",
+                    version=f"%(prog)s {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("describe", help="描述图片主体与色调")
