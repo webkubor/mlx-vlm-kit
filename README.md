@@ -1,5 +1,8 @@
 # mlx-vlm-kit
 
+> [English](README.en.md) | 中文
+
+
 **Mac 本地看图理解引擎** —— 让你的 Mac 看懂图片、回答关于图片的任何问题。
 Qwen3-VL-4B（Apple MLX 原生），免费、离线、可被任何项目调用。
 
