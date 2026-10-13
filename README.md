@@ -77,7 +77,7 @@ vlm ask shot.png --q "几个人？" --json | jq -r .text
 | [voxflow](https://github.com/webkubor/voxflow) | 封面语义质检（原来只查尺寸，现在连内容一起查） |
 | [reel-kit](https://github.com/webkubor/reel-kit) | 分镜帧理解、缩略图吸引力评估 |
 | [voiceinput](https://github.com/webkubor/voiceinput) | 截图读字、界面理解（`visionkit` crate 桥接本 CLI） |
-| [museav-mcp](https://github.com/webkubor/museav-mcp) | 注册为 satellite tool，agent 通过 MCP 调用 |
+| [cs-mcp](https://github.com/webkubor/cs-mcp) | 注册为 satellite tool，agent 通过 MCP 调用（原名 museav-mcp） |
 
 ## 模型
 

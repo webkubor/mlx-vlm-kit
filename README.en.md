@@ -74,7 +74,7 @@ vlm ask shot.png --q "How many people?" --json | jq -r .text
 | [voxflow](https://github.com/webkubor/voxflow) | Cover semantic check (used to be size-only, now content-aware too) |
 | [reel-kit](https://github.com/webkubor/reel-kit) | Storyboard frame understanding, thumbnail appeal scoring |
 | [voiceinput](https://github.com/webkubor/voiceinput) | Screenshot OCR + UI comprehension (the `visionkit` crate bridges this CLI) |
-| [museav-mcp](https://github.com/webkubor/museav-mcp) | Registered as a satellite tool, agents call via MCP |
+| [cs-mcp](https://github.com/webkubor/cs-mcp) | Registered as a satellite tool, agents call via MCP (formerly museav-mcp) |
 
 ## Model
 
