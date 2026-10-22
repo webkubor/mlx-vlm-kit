@@ -3,11 +3,18 @@
 > [English](README.en.md) | 中文
 
 
+<p align="center">
+  <a href="https://github.com/webkubor/mlx-vlm-kit#-安装"><img src="https://img.shields.io/badge/pipx-install-2ea043?style=flat-square" alt="安装方式"></a>
+  <a href="https://github.com/webkubor/mlx-vlm-kit/releases"><img src="https://img.shields.io/github/v/release/webkubor/mlx-vlm-kit?style=for-the-badge&color=coral" alt="版本"></a>
+  <a href="https://github.com/webkubor/mlx-vlm-kit/releases/latest"><img src="https://img.shields.io/github/downloads/webkubor/mlx-vlm-kit/total?style=for-the-badge&color=orange" alt="下载"></a>
+  <a href="https://github.com/webkubor/mlx-vlm-kit/blob/main/LICENSE"><img src="https://img.shields.io/github/license/webkubor/mlx-vlm-kit?style=for-the-badge&color=gold" alt="License"></a>
+  <a href="https://github.com/webkubor/mlx-vlm-kit"><img src="https://img.shields.io/github/stars/webkubor/mlx-vlm-kit?style=for-the-badge&color=coral" alt="Stars"></a>
+  <a href="https://github.com/webkubor/mlx-vlm-kit"><img src="https://img.shields.io/badge/Python-333333?style=for-the-badge" alt="技术栈"></a>
+</p>
+
 **Mac 本地看图理解引擎** —— 让你的 Mac 看懂图片、回答关于图片的任何问题。
 Qwen3-VL-4B（Apple MLX 原生），免费、离线、可被任何项目调用。
 
-[![npm](https://img.shields.io/badge/pipx-install-2ea043?style=flat-square)](#-安装)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
 ## 为什么
 
