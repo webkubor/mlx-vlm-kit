@@ -1,0 +1,33 @@
+name: check
+
+# mlx-vlm-kit 的门禁：语法编译 + 打包。
+#
+# 为什么只做这两样，不做 import 测试：mlx 是 Apple Silicon 专属，Linux runner
+# 上 import 必然失败——那是量具的盲区，不是包的缺陷。要真跑模型得在 macOS
+# runner 上（且要下模型权重），那是另一条更重的流水线，不塞在这里。
+#
+# 打包这步不能省：这个包的 dist/ 是随仓库走的，pyproject 改坏了（hatchling
+# 配置、入口点写错）在本地不 import 就发现不了。
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 语法编译
+        run: python -m compileall -q vlmkit
+
+      - name: 打包（输出到临时目录，不污染仓库里的 dist/）
+        run: |
+          python -m pip install --quiet build
+          python -m build --wheel --outdir "${RUNNER_TEMP}/dist"
