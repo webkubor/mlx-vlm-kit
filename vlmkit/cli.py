@@ -207,39 +207,52 @@ def cmd_cover_check(args):
 
 
 def cmd_ui_review(args):
-    """两段式审查。
+    """两段式审查，复核优先。
 
-    为什么要两段：4B 模型看整页截图会把它降采样，标题被裁切、按钮没对齐
-    这类像素级缺陷会直接消失（实测被截断的标题被答成「完整显示」）。
-    第一段给结构化结论，第二段用「复合提问 + 最多 N 条 + 引用控件名」的
-    问法在放大图上复查——实测只有这种问法能稳定召回真实缺陷，
-    而带 PASS 模板或逐项是/否清单的问法会诱发模型附和或漏报。
+    为什么要这个顺序（实测数据驱动的，别倒回去）：
+    - 第一段「结构化扫描」对像素级缺陷召回不稳：同一张带截断标题的截图，
+      zoom=3 时 8 次里 3 次整段漏报；zoom=6 也偶发两段全瞎。
+    - 第二段「复合提问复核」（问「是否存在裁切/遮挡/不齐」+ 限 3 条 +
+      必须引用控件名）在同一张图上 10/10 稳定召回，干净页 6/6 无误报。
+    所以让复核段打头：复核说有问题就是有问题；复核说没有，再跑一次复核
+    确认（两次都空才敢 PASS）；第一段结构化扫描降级为「复核没发现时补
+    summary/limits 的描述器」，不再拥有放行权。
     """
     context = f"页面用途：{args.context}" if args.context else "页面用途：未提供。"
     criteria = f"验收要求：{args.criteria}" if args.criteria else "验收要求：未提供；不要臆造规范。"
-    question = UI_REVIEW_PROMPT.format(context=context, criteria=criteria)
 
     original = args.image
     zoomed = upscaled_for_review(original, factor=args.zoom) if args.zoom > 0 else original
     try:
-        scan = ask(zoomed, question, model_dir=args.model, max_tokens=args.max_tokens)
-        review = parse_ui_review(scan["text"])
-        elapsed = scan["elapsed_secs"]
-
-        if review["status"] == "PASS":
-            # 第一段说没问题，就用更细的问法在放大图上再查一遍。
-            recheck = ask(
+        # ── 第一优先：复核段（有权发现问题）──
+        elapsed = 0.0
+        review = {"status": "PASS", "summary": "", "findings": [], "limits": []}
+        for attempt in range(2):
+            probe = ask(
                 zoomed,
                 UI_RECHECK_PROMPT.format(max_findings=args.max_findings),
                 model_dir=args.model,
                 max_tokens=args.max_tokens,
             )
-            elapsed = round(elapsed + recheck["elapsed_secs"], 2)
-            extra = parse_recheck_findings(recheck["text"])
+            elapsed = round(elapsed + probe["elapsed_secs"], 2)
+            extra = parse_recheck_findings(probe["text"])
             if extra:
                 review["status"] = "ISSUES_FOUND"
                 review["findings"] = extra
-                review["summary"] = review["summary"] or f"放大复核发现 {len(extra)} 处可见问题。"
+                review["summary"] = f"发现 {len(extra)} 处可见问题。"
+                break
+        else:
+            # ── 两轮复核都没发现：补一轮结构化描述给 summary/limits（无放行权）──
+            scan = ask(zoomed, UI_REVIEW_PROMPT.format(context=context, criteria=criteria),
+                       model_dir=args.model, max_tokens=args.max_tokens)
+            elapsed = round(elapsed + scan["elapsed_secs"], 2)
+            scanned = parse_ui_review(scan["text"])
+            if scanned["status"] == "ISSUES_FOUND" and scanned["findings"]:
+                # 结构化扫描反而发现了：信它，别吞掉。
+                review = scanned
+            else:
+                review["summary"] = scanned["summary"] or "两轮放大复核未发现可见缺陷。"
+                review["limits"] = scanned["limits"]
     finally:
         cleanup_temp_image(zoomed if zoomed != original else "")
 
@@ -328,8 +341,8 @@ def main():
     p.add_argument("--criteria", help="设计稿、验收标准或必须满足的要求")
     p.add_argument("--fail-on-issues", action="store_true",
                    help="发现问题或无法判断时返回非零，供验收脚本使用")
-    p.add_argument("--zoom", type=float, default=3.0,
-                   help="审查前的放大倍数（默认 3；0 表示不放大）")
+    p.add_argument("--zoom", type=float, default=6.0,
+                   help="审查前的放大倍数（默认 6；0 表示不放大）")
     p.add_argument("--max-findings", type=int, default=3,
                    help="复核阶段最多报几条问题（默认 3）")
     _add_subcommand_output_options(p)

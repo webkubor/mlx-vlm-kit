@@ -84,7 +84,13 @@ Image formats are detected by **content**, not filename extension — extensionl
 - Never guesses what a screenshot cannot prove: clickability, form submission, responsive breakpoints, accessibility — these are listed in `limits`
 - If the model fails to answer in the required format, the result is `NOT_DETERMINED` — "didn't understand" is **never** treated as "no problems"
 
-Known boundary (honest): a 4B model downsamples full-page screenshots, so pixel-level defects can fall below its perception. ui-review therefore upscales 3× by default and, when the first pass claims PASS, runs a second, sharper pass. Both passes must pass for a PASS. In testing this reliably catches defects like truncated titles and mismatched button sizes, but a small model occasionally over-reports questionable findings — treat each finding's evidence as a lead to verify, not gospel.
+Known boundary (honest): a 4B model downsamples full-page screenshots, so pixel-level defects can fall below its perception. How ui-review handles it (tuned by measurement, see CHANGELOG):
+
+1. Upscale 6× first.
+2. **Problem-hunt pass leads**: a compound "any clipping/occlusion/misalignment?" probe — 10/10 stable recall on a seeded-defect page, zero false positives on a clean page. Any hit → ISSUES_FOUND in ~30s.
+3. A clean probe runs twice; only when both come back empty does a structured description run to fill summary/limits, then PASS (~80s — slower by design: clearing a page should cost more than flagging it).
+
+In testing this reliably catches truncated titles and mismatched button sizes, but a small model occasionally over-reports questionable findings — treat each finding's evidence as a lead to verify, not gospel.
 
 ## Who uses it
 
