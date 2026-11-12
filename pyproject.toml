@@ -1,6 +1,6 @@
 [project]
 name = "mlx-vlm-kit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Mac 本地看图理解引擎 — Qwen3-VL (MLX)，免费、离线、可问任何问题"
 readme = "README.md"
 requires-python = ">=3.12"

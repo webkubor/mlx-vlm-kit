@@ -6,7 +6,7 @@
 - 纯文本输出：说不说、念给谁听，下游自己接（管道友好）
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 DEFAULT_MODEL_REPO = "mlx-community/Qwen3-VL-4B-Instruct-4bit"
 DEFAULT_MODEL_DIR_NAME = "qwen3-vl-4b-4bit"
