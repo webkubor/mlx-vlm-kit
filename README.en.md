@@ -25,6 +25,7 @@ Four layers of capability, not just "eyes":
 |---|---|---|
 | 👁 **See** | What's in the image | Read text in a screenshot, check if a cover has a title |
 | ⚖️ **Judge** | Evaluate against criteria | Is this cover good? Is the thumbnail eye-catching? |
+| 🔍 **Nitpick** | Pixel-level UI screenshot review | Truncated titles, mismatched buttons, broken spacing |
 | 🔄 **Reverse** | Derive a generation prompt from an image | Good cover → reverse → recreate variants with an image gen model |
 | 💬 **Ask** | `--ask` any question | "Is this image a fit for Xiaohongshu?" |
 
@@ -57,6 +58,12 @@ vlm cover-check ~/Music/album/cover.jpg
 # Batch quality check (recurses subdirectories)
 vlm cover-check ~/out/pending --batch
 
+# UI screenshot review (catch pixel-level defects after a change)
+vlm ui-review shot.png --context "settings page card actions"
+
+# Review + acceptance criteria + gate exit code (non-zero when issues found)
+vlm ui-review shot.png --criteria "buttons must be the same size" --fail-on-issues
+
 # Reverse-engineer a generation prompt (English, feed straight into an image gen model)
 vlm reverse-prompt great-cover.jpg --lang en
 ```
@@ -66,6 +73,18 @@ Human-readable output by default; `--json` for programmatic use (pipe-friendly):
 ```bash
 vlm ask shot.png --q "How many people?" --json | jq -r .text
 ```
+
+Image formats are detected by **content**, not filename extension — extensionless screenshots from system capture tools or chat apps work directly.
+
+## How ui-review decides
+
+`vlm ui-review` outputs three states: `PASS` / `ISSUES_FOUND` / `NOT_DETERMINED`. Each finding carries location + in-image evidence + suggestion, plus explicit scope limits:
+
+- Only checks what a **screenshot can prove**: clipped/occluded/overflowing text, misaligned elements, inconsistent spacing, poor contrast, broken hierarchy
+- Never guesses what a screenshot cannot prove: clickability, form submission, responsive breakpoints, accessibility — these are listed in `limits`
+- If the model fails to answer in the required format, the result is `NOT_DETERMINED` — "didn't understand" is **never** treated as "no problems"
+
+Known boundary (honest): a 4B model downsamples full-page screenshots, so pixel-level defects can fall below its perception. ui-review therefore upscales 3× by default and, when the first pass claims PASS, runs a second, sharper pass. Both passes must pass for a PASS. In testing this reliably catches defects like truncated titles and mismatched button sizes, but a small model occasionally over-reports questionable findings — treat each finding's evidence as a lead to verify, not gospel.
 
 ## Who uses it
 

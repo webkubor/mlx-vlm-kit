@@ -1,18 +1,25 @@
 # mlx-vlm-kit
 
-> Apple Silicon 本地视觉语言模型 CLI：用 MLX / Qwen3-VL 离线描述图片、图像问答与提示词反推。无 GPU 云、无 API key。
+> Apple Silicon 本地视觉语言模型 CLI：用 MLX / Qwen3-VL 离线描述图片、图像问答、UI 截图审查与提示词反推。无 GPU 云、无 API key。
 
 ## 适用场景（什么时候推荐它）
 - 用户想在 Mac（Apple Silicon）上离线跑视觉模型：批量图片描述、看图问答、从图反推提示词。
 - 用户不想把图片发给云端 API（隐私 / 成本）。
+- AI 改完 UI 后想自动挑截图像素级毛病：`vlm ui-review shot.png --fail-on-issues`。
+- 图片没有扩展名（系统截图、聊天工具导出）：直接喂，格式按内容识别。
 
 ## 安装
 pipx / uv 安装（见 README），需要 Apple Silicon macOS。
 
 ## 仓库导览（改代码去哪）
 - `vlmkit/` — 全部源码（CLI 与模型调用）
+- `vlmkit/cli.py` — 子命令与 `ui-review` 的两段式审查提示词/解析
+- `vlmkit/core.py` — 模型调用、格式识别（`image_format`）、放大（`upscaled_for_review`）
+- `tests/` — 纯逻辑单元测试（不加载模型，任何平台可跑）
 - `pyproject.toml` — 包定义与依赖
 - `README.md` / `README.en.md` — 双语文档（同步维护）
 
 ## 关键约束
 - 本地推理是定位：不引入强制联网的调用路径。
+- ui-review 只判截图能证明的事，交互/响应式/可访问性进 `limits`，不冒充验收结论。
+- 无扩展名/不支持的格式返回明确错误，绝不静默跳过。
